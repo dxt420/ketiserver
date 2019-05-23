@@ -95,21 +95,24 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest(app);
 
 
 process.env.DEBUG = 'dialogflow:debug'; // enables lib debugging statements
- 
+
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
-  const agent = new WebhookClient({ request, response });
+  const agent = new WebhookClient({
+    request,
+    response
+  });
   console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
   console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
-  
- 
+
+
   function welcome(agent) {
     agent.add(`Hi! My name is Keti and i'll be your electronic oncology consultant.`);
   }
- 
-  
+
+
   let intentMap = new Map();
   intentMap.set('Default Welcome Intent', welcome);
-  
+
   agent.handleRequest(intentMap);
 });
 
@@ -117,7 +120,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 app.post('/getUser', (req, res) => {
 
-  console.log(req.headers)
+  //console.log(req.headers)
 
   const token = req.headers.authorization.split('Bearer ')[1]
 
@@ -138,7 +141,7 @@ app.post('/getUser', (req, res) => {
 
 app.post('/message', async (req, res) => {
   // simulate actual db save with id and createdAt added
-  console.log(req.body);
+  //console.log(req.body);
   const chat = {
     ...req.body,
     id: shortId.generate(),
@@ -150,19 +153,18 @@ app.post('/message', async (req, res) => {
   const message = chat.message;
   try {
     const response = await dialogFlow.send(message);
-  // trigger this update to our pushers listeners
-  pusher.trigger('chat-bot', 'chat', {
-    message: `${response.data.result.fulfillment.speech}`,
-    type: 'bot',
-    createdAt: new Date().toISOString(),
-    id: shortId.generate()
-  })
-  res.send(chat)
-  }
-  catch(e) {
+    // trigger this update to our pushers listeners
+    pusher.trigger('chat-bot', 'chat', {
+      message: `${response.data.result.fulfillment.speech}`,
+      type: 'bot',
+      createdAt: new Date().toISOString(),
+      id: shortId.generate()
+    })
+    res.send(chat)
+  } catch (e) {
     console.log('Catch an error: ', e)
   }
-  
+
 })
 
 app.listen(process.env.PORT || 5000, () => console.log('Listening at 5000'))
