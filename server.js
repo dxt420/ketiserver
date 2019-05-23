@@ -148,7 +148,8 @@ app.post('/message', async (req, res) => {
   pusher.trigger('chat-bot', 'chat', chat)
 
   const message = chat.message;
-  const response = await dialogFlow.send(message);
+  try {
+    const response = await dialogFlow.send(message);
   // trigger this update to our pushers listeners
   pusher.trigger('chat-bot', 'chat', {
     message: `${response.data.result.fulfillment.speech}`,
@@ -157,6 +158,11 @@ app.post('/message', async (req, res) => {
     id: shortId.generate()
   })
   res.send(chat)
+  }
+  catch(e) {
+    console.log('Catch an error: ', e)
+  }
+  
 })
 
 app.listen(process.env.PORT || 5000, () => console.log('Listening at 5000'))
