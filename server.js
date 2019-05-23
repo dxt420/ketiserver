@@ -167,4 +167,4 @@ app.post('/message', async (req, res) => {
 
 })
 
-app.listen(8081 , () => console.log('Listening at 8081'))
+app.listen(process.env.PORT , () => console.log('Listening at port' + process.env.PORT))
