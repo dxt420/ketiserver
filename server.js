@@ -12,23 +12,24 @@ const dialogFlow = require('./diagflow')
 const app = express()
 
 
-app.use(cors())
+const functions = require('firebase-functions')
+const {
+  WebhookClient
+} = require('dialogflow-fulfillment')
+const {
+  Card,
+  Suggestion,
+  BasicCard,
+  Button,
+  Image
+} = require('dialogflow-fulfillment')
+const {
+  dialogflow
+} = require('actions-on-google')
 
-app.use(bodyParser.urlencoded({
-  extended: false
-}))
-
-app.use(bodyParser.json())
-
-firebase.initializeApp({
-  apiKey: "AIzaSyBbcT4BZ8tiDWsrbV16eFgo_z17bqBsOBs",
-  authDomain: "chanjia-e9ddb.firebaseapp.com",
-  databaseURL: "https://chanjia-e9ddb.firebaseio.com",
-  projectId: "chanjia-e9ddb",
-  storageBucket: "chanjia-e9ddb.appspot.com",
-  messagingSenderId: "885878744432"
-
-})
+const conv = dialogflow({
+  debug: true
+});
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID,
@@ -39,20 +40,96 @@ const pusher = new Pusher({
 })
 
 
+const firebaseConfig = {
+  apiKey: "AIzaSyBbcT4BZ8tiDWsrbV16eFgo_z17bqBsOBs",
+  authDomain: "chanjia-e9ddb.firebaseapp.com",
+  databaseURL: "https://chanjia-e9ddb.firebaseio.com",
+  projectId: "chanjia-e9ddb",
+  storageBucket: "chanjia-e9ddb.appspot.com",
+  messagingSenderId: "885878744432"
+
+}
+
+
+
+
+app.use(cors())
+
+app.use(bodyParser.urlencoded({
+  extended: false
+}))
+
+app.use(bodyParser.json())
+
+
+admin.initializeApp(firebaseConfig)
+
+// Required by Firebase
+exports.dialogflowFirebaseFulfillment = functions.https.onRequest(app);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+process.env.DEBUG = 'dialogflow:debug'; // enables lib debugging statements
+ 
+exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
+  const agent = new WebhookClient({ request, response });
+  console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
+  console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
+  
+ 
+  function welcome(agent) {
+    agent.add(`Hi! My name is Keti and i'll be your electronic oncology consultant.`);
+  }
+ 
+  
+  let intentMap = new Map();
+  intentMap.set('Default Welcome Intent', welcome);
+  
+  agent.handleRequest(intentMap);
+});
+
+
+
 app.post('/getUser', (req, res) => {
+
+  console.log(req.headers)
 
   const token = req.headers.authorization.split('Bearer ')[1]
 
   return admin.auth().verifyIdToken(token)
-              .then(decodedToken => {
-                  const uid = decodedToken.uid;
-                  console.log(uid);
-                  console.log('Dext was here');
+    .then(decodedToken => {
+      const uid = decodedToken.uid;
+      console.log(uid);
+      console.log('Dext was here');
 
-                  res.status(200).send('Looks good!')
+      res.status(200).send('Looks good!')
 
-              })
-              .catch(err => res.status(403).send('Unauthorized'))
+    })
+    .catch(err => res.status(403).send('Unauthorized'))
 
 
 })
