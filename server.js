@@ -33,9 +33,9 @@ const conv = dialogflow({
 
 
 const pusher = new Pusher({
-  appId: process.env.PUSHER_APP_ID,
-  key: process.env.PUSHER_APP_KEY,
-  secret: process.env.PUSHER_APP_SECRET,
+  appId: '763384',
+  key: '7e68e39c122f6cbf6b79',
+  secret: '9be54d8e58c065d44a06',
   cluster: 'mt1',
   encrypted: true
 })
